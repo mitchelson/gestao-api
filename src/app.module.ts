@@ -7,6 +7,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { DatabaseModule } from './database/database.module';
 import { HealthController } from './health/health.controller';
 import { AccountsModule } from './modules/accounts/accounts.module';
+import { AdminModule } from './modules/admin/admin.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ConfigModule as AppConfigModule } from './modules/config/config.module';
 import { ContatoModule } from './modules/contato/contato.module';
@@ -35,6 +36,7 @@ import { V1Controller } from './v1/v1.controller';
     DatabaseModule,
     CommonModule,
     AuthModule,
+    AdminModule,
     UsersModule,
     AccountsModule,
     MinisteriosModule,

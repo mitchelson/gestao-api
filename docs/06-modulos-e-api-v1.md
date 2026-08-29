@@ -150,13 +150,21 @@ Legenda: 🌐 público | 🔒 autenticado | 👑 admin | 📋 líder/supervisor 
 
 ## Compatibilidade temporária
 
-Durante cutover, nginx ou a API pode expor:
+A API aplica middleware que reescreve:
 
 ```text
-/api/* → rewrite interno → /v1/*
+/api/* → /v1/*
 ```
 
-Assim `pib-app` com `EXPO_PUBLIC_API_URL=https://gestao-api...` pode usar paths antigos até atualizar o app.
+Assim o `pib-app` pode fazer OTA só com `EXPO_PUBLIC_API_URL=https://gestao-api.pibrr.com`, mantendo paths `/api/...` até uma versão futura migrar para `/v1`.
+
+---
+
+## Admin (app)
+
+| Legado | v1 | Método | Auth |
+|--------|-----|--------|------|
+| `/api/admin/dashboard` (app; não existia no Next) | `/v1/admin/dashboard` | GET | 🔒 | `{ totalMembros }` |
 
 ---
 
@@ -164,4 +172,4 @@ Assim `pib-app` com `EXPO_PUBLIC_API_URL=https://gestao-api...` pode usar paths 
 
 Contratos request/response completos: `pibrr/docs/API.md` (atualizar base URL após cutover).
 
-Total: **54 route files** no Next → **~45 recursos v1** (alguns consolidados).
+Total: **54 route files** no Next → **~45 recursos v1** (alguns consolidados) + admin/dashboard.

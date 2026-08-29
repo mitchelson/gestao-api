@@ -62,14 +62,14 @@ bash /opt/gestao-api/deploy/post-deploy.sh
 
 App / site **não** mudam ainda.
 
-## Cutover (NÃO fazer agora)
+## Cutover app (quando decidir)
 
-Quando quiser:
-
-1. [ ] Alinhar `AUTH_JWT_SECRET` com Vercel `AUTH_SECRET`
-2. [ ] OTA `pib-app`: `EXPO_PUBLIC_API_URL=https://gestao-api.pibrr.com`
-3. [ ] Depois: web `pibrr` → BFF / `GESTAO_API_URL`
-4. [ ] Remover rotas `/api` do Next quando estável
+1. [ ] Deploy gestao-api com middleware `/api`→`/v1` + `GET /v1/admin/dashboard`
+2. [ ] Alinhar `AUTH_JWT_SECRET` com Vercel `AUTH_SECRET` (ou force re-login)
+3. [ ] Smoke: `curl -s https://gestao-api.pibrr.com/api/users/me` → 401 (não 404)
+4. [ ] OTA `pib-app`: `EXPO_PUBLIC_API_URL=https://gestao-api.pibrr.com` (paths `/api` intactos)
+5. [ ] Depois: web `pibrr` → BFF / `GESTAO_API_URL`
+6. [ ] Remover rotas `/api` do Next quando estável
 
 ## Comandos úteis na VPS
 
@@ -77,4 +77,5 @@ Quando quiser:
 pm2 status gestao-api
 pm2 logs gestao-api --lines 50
 curl -s http://127.0.0.1:3060/health
+curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:3060/api/users/me
 ```

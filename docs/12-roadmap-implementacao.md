@@ -9,7 +9,7 @@ Cronograma sugerido em fases incrementais. Cada fase entrega valor testável em 
 - [x] Repositório `gestao-api` com docs completas
 - [x] Workflows CI/CD scaffold
 - [x] Bootstrap VPS: `/opt/gestao-api`, nginx, certbot, secrets base
-- [ ] Secrets GitHub: `VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY` / `VPS_PASSWORD` (manual — ver [13-go-live-checklist.md](./13-go-live-checklist.md))
+- [x] Secrets GitHub: `VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY` / `VPS_PASSWORD` (ver [13-go-live-checklist.md](./13-go-live-checklist.md))
 
 **Entregável:** repo no GitHub; VPS com API no ar.
 
@@ -34,9 +34,10 @@ Cronograma sugerido em fases incrementais. Cada fase entrega valor testável em 
 
 ### Validação
 
-- [ ] Preencher Google/Apple/Firebase em `/root/.secrets/gestao_api_env`
+- [x] Preencher Google/Apple/Firebase em `/root/.secrets/gestao_api_env`
 - [ ] Login de teste contra gestao-api (sem cutover do app)
 - [ ] Paridade JSON com legado em `/users/me`
+- [x] Compat `/api`→`/v1` + `GET /v1/admin/dashboard` (pré-OTA)
 
 **Entregável:** API autenticável; app ainda no legado até cutover.
 
