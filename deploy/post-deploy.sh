@@ -50,9 +50,10 @@ chmod 600 .env.production
 ln -sf .env.production .env
 
 export NODE_ENV=production
+# JSON embutido de service account quebra `source`; use FILE path ou pule a linha.
 set -a
 # shellcheck disable=SC1091
-. ./.env.production
+source <(grep -vE "^FIREBASE_SERVICE_ACCOUNT_JSON=['\"]?\{" .env.production)
 set +a
 
 if [ -d db/migrations ] && [ -f scripts/migrate.sh ]; then

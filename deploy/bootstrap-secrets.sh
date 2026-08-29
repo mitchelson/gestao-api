@@ -38,6 +38,8 @@ EXPO_PUBLIC_GOOGLE_CLIENT_ID_WEB=
 
 APPLE_CLIENT_ID=
 FIREBASE_PROJECT_ID=
+# Preferir arquivo (JSON com private_key quebra `source` no bash):
+FIREBASE_SERVICE_ACCOUNT_JSON_FILE=/root/.secrets/firebase_service_account.json
 FIREBASE_SERVICE_ACCOUNT_JSON=
 
 CORS_ORIGINS=https://www.pibrr.com,https://pibrr.com
