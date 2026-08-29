@@ -4,7 +4,7 @@ Backend dedicado da **gestão da igreja** (PIB Roraima): membros, escalas, feed,
 
 | Item | Valor |
 |------|--------|
-| **Status** | API v1 no ar + compat `/api`→`/v1` — app ainda usa `www.pibrr.com` até OTA |
+| **Status** | Cutover app OTA → gestao-api (2026-08-29). Web ainda no Next. |
 | **Banco** | Postgres `pibrr_gestao` na VPS (`127.0.0.1:5433`) |
 | **Hospedagem** | VPS + PM2 + nginx |
 | **URL produção** | `https://gestao-api.pibrr.com` |
