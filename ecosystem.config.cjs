@@ -1,0 +1,18 @@
+/** @type {import('pm2').StartOptions} */
+module.exports = {
+  apps: [
+    {
+      name: 'gestao-api',
+      script: 'dist/server.js',
+      cwd: '/opt/gestao-api',
+      instances: 1,
+      exec_mode: 'fork',
+      env_production: {
+        NODE_ENV: 'production',
+        PORT: 3060,
+        HOST: '127.0.0.1',
+        TRUST_PROXY: 'true',
+      },
+    },
+  ],
+};
