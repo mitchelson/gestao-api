@@ -1,0 +1,14 @@
+{
+  "name": "gestao-api",
+  "install": "npm ci",
+  "terminals": [
+    {
+      "name": "dev",
+      "command": "npm run dev",
+      "description": "NestJS dev server (nest start --watch) on http://127.0.0.1:3060 with /health and /v1 endpoints."
+    }
+  ],
+  "ports": [
+    { "name": "api", "port": 3060 }
+  ]
+}
