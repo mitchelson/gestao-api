@@ -150,7 +150,7 @@ Legenda: 🌐 público | 🔒 autenticado | 👑 admin | 📋 líder/supervisor 
 
 ## Compatibilidade temporária
 
-Durante cutover, nginx ou Fastify pode expor:
+Durante cutover, nginx ou a API pode expor:
 
 ```text
 /api/* → rewrite interno → /v1/*

@@ -10,7 +10,7 @@
                                     │
     ┌──────────────┐    ┌───────────▼───────────┐    ┌──────────────┐
     │  pib-app     │    │     gestao-api        │    │ gestao-web   │
-    │  (Expo/EAS)  │───►│  Fastify + Node 22    │◄───│ (Next futuro)│
+    │  (Expo/EAS)  │───►│  NestJS + Node 22     │◄───│ (Next futuro)│
     └──────────────┘    │  PM2 @ VPS :3060      │    └──────────────┘
                         │  nginx :443            │
     ┌──────────────┐    └───────────┬───────────┘
@@ -100,19 +100,21 @@ Durante transição, `pibrr` na Vercel pode continuar com NextAuth até cutover 
 
 ```text
 src/
-├── server.ts              # bootstrap Fastify
+├── main.ts                # bootstrap NestJS
+├── app.module.ts          # módulo raiz
 ├── config/                # env, logger
-├── plugins/               # cors, helmet, rate-limit, db pool
-├── middleware/
-│   ├── auth.ts            # JWT + session cookie
-│   └── permissions.ts     # hasPermission(), requireRole()
-├── modules/               # um folder por domínio
+├── common/
+│   ├── guards/            # JwtAuthGuard, RolesGuard
+│   ├── decorators/        # @CurrentUser(), @RequirePermission()
+│   ├── filters/           # HttpExceptionFilter
+│   └── interceptors/      # logging, correlation id
+├── modules/               # um módulo Nest por domínio
 │   ├── auth/
 │   ├── users/
 │   ├── escalas/
 │   └── ...
-├── db/
-│   ├── pool.ts            # pg Pool (localhost VPS)
+├── database/
+│   ├── database.module.ts # pg Pool (localhost VPS)
 │   └── migrations/        # SQL versionado
 └── jobs/                  # cron interno ou scripts PM2
     └── push-dispatch.ts
@@ -122,10 +124,10 @@ src/
 
 | Camada | Pode | Não pode |
 |--------|------|----------|
-| `routes` | Validar input (Zod), chamar service, mapear HTTP | SQL direto |
+| `controllers` | Validar input (DTO/Zod), chamar service, mapear HTTP | SQL direto |
 | `services` | Regras de negócio, transações | Conhecer `req`/`res` |
 | `repositories` | SQL parametrizado | Regras de negócio |
-| `middleware` | Auth, logging, correlation id | Lógica de domínio |
+| `guards` / `interceptors` | Auth, logging, correlation id | Lógica de domínio |
 
 ## Comunicação e contratos
 
@@ -149,7 +151,7 @@ src/
 
 | Item | Implementação |
 |------|----------------|
-| Logs | `pino` → stdout → PM2 → `/var/log/gestao-api/` |
+| Logs | NestJS Logger (ou `nestjs-pino`) → stdout → PM2 → `/var/log/gestao-api/` |
 | Health | `GET /health` (sem auth) — `{ status, db, version }` |
 | Métricas | Fase 2 — Prometheus ou logs estruturados |
 | Erros | Não vazar stack em produção; `X-Request-Id` |
@@ -177,7 +179,7 @@ Fase futura se necessário:
 | Componente | Escolha | Motivo |
 |------------|---------|--------|
 | Runtime | Node.js **22 LTS** | Alinhado VPS (nvm), school-backend |
-| Framework | **Fastify 5** | Mesmo ecossistema que vendas (Express-like), performance, plugins |
+| Framework | **NestJS 11** | Módulos, DI, guards, alinhado a backends TypeScript enterprise |
 | Linguagem | TypeScript strict | Paridade com pibrr/pib-app |
 | DB driver | `pg` + pool | Processo long-lived na VPS; sem driver Neon HTTP |
 | Validação | Zod | Schemas compartilháveis |

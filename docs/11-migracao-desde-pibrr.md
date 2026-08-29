@@ -34,13 +34,12 @@ Fase 5 ─ Remover rotas /api/* do pibrr (exceto NextAuth se necessário)
 
 | gestao-api (novo) | Origem em `pibrr` |
 |-------------------|-------------------|
-| `src/routes/auth/mobile.ts` | `app/api/auth/mobile/route.ts` |
-| `src/lib/mobile-auth.ts` | `lib/mobile-auth.ts` |
-| `src/lib/mobile-auth-user.ts` | `lib/mobile-auth-user.ts` |
+| `src/modules/auth/auth.controller.ts` | `app/api/auth/mobile/route.ts` |
+| `src/common/guards/jwt-auth.guard.ts` | `lib/mobile-auth.ts` |
+| `src/modules/auth/auth.service.ts` | `lib/mobile-auth-user.ts` |
 | `src/lib/account-roles.ts` | `lib/account-roles.ts` |
-| `src/middleware/auth.ts` | `lib/mobile-auth.ts` (verify) |
-| `src/routes/users/*` | `app/api/users/**` |
-| `src/routes/escalas/*` | `app/api/escalas/**` |
+| `src/modules/users/*` | `app/api/users/**` |
+| `src/modules/escalas/*` | `app/api/escalas/**` |
 | ... | ver doc 06 |
 
 ### O que NÃO portar para gestao-api

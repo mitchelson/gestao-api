@@ -19,13 +19,13 @@ Cronograma sugerido em fases incrementais. Cada fase entrega valor testável em 
 
 ### Código
 
-- [ ] Fastify 5 + TypeScript + `pg` pool
+- [ ] NestJS 11 + TypeScript + `pg` pool
 - [ ] `GET /health` (DB ping)
 - [ ] `POST /v1/auth/mobile` (Google + Apple)
-- [ ] Middleware JWT
+- [ ] `JwtAuthGuard` (validação JWT)
 - [ ] `GET /v1/users/me`
 - [ ] `GET /v1/auth/permissions`
-- [ ] Logger (pino), CORS, rate-limit auth
+- [ ] Logger (NestJS), CORS (`@nestjs/config`), rate-limit auth (`@nestjs/throttler`)
 
 ### Infra
 

@@ -3,7 +3,7 @@ module.exports = {
   apps: [
     {
       name: 'gestao-api',
-      script: 'dist/server.js',
+      script: 'dist/main.js',
       cwd: '/opt/gestao-api',
       instances: 1,
       exec_mode: 'fork',

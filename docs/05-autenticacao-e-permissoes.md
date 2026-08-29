@@ -11,7 +11,7 @@ Emite JWT (mobile) ou cookie de sessão (web)
         ↓
 Clientes enviam credencial em cada request
         ↓
-Middleware valida JWT/cookie — NÃO consulta DB por request (hot path)
+Guard NestJS valida JWT/cookie — NÃO consulta DB por request (hot path)
 ```
 
 \* Firebase: apenas como **provider opcional** de login; **não** é diretório de usuários.
@@ -81,14 +81,14 @@ Portar lógica de `pibrr/app/api/auth/mobile/route.ts` + `lib/mobile-auth-user.t
 }
 ```
 
-### Validação (middleware)
+### Validação (`JwtAuthGuard`)
 
 1. Header `Authorization: Bearer <token>`
 2. `jwtVerify` com secret
 3. Extrair `userId = payload.userId ?? payload.sub`
 4. Extrair `role = payload.role ?? "membro"`
 5. **Não** consultar `users.ativo` em cada request (checagem no login + job opcional de revogação)
-6. Anexar `request.user = { userId, role, ministerioIds }`
+6. Anexar `request.user = { userId, role, ministerioIds }` via decorator `@CurrentUser()`
 
 ### Erros
 

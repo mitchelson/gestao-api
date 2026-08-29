@@ -14,23 +14,29 @@ gestao-api/
 ├── db/
 │   └── migrations/          # 001_*.sql, 002_*.sql
 ├── src/
-│   ├── server.ts
-│   ├── app.ts
+│   ├── main.ts
+│   ├── app.module.ts
 │   ├── config/
 │   │   ├── env.ts
 │   │   └── logger.ts
-│   ├── plugins/
-│   │   ├── database.ts
-│   │   └── cors.ts
-│   ├── middleware/
-│   │   ├── authenticate.ts
-│   │   └── authorize.ts
+│   ├── common/
+│   │   ├── guards/
+│   │   │   ├── jwt-auth.guard.ts
+│   │   │   └── roles.guard.ts
+│   │   ├── decorators/
+│   │   │   └── current-user.decorator.ts
+│   │   └── filters/
+│   │       └── http-exception.filter.ts
+│   ├── database/
+│   │   ├── database.module.ts
+│   │   └── database.service.ts
 │   ├── modules/
 │   │   ├── auth/
-│   │   │   ├── auth.routes.ts
+│   │   │   ├── auth.module.ts
+│   │   │   ├── auth.controller.ts
 │   │   │   ├── auth.service.ts
 │   │   │   ├── auth.repository.ts
-│   │   │   └── auth.schema.ts
+│   │   │   └── dto/
 │   │   ├── users/
 │   │   ├── ministerios/
 │   │   ├── eventos/
@@ -55,9 +61,11 @@ gestao-api/
 ├── test/
 │   ├── integration/
 │   └── unit/
+├── nest-cli.json
 ├── ecosystem.config.cjs
 ├── package.json
 ├── tsconfig.json
+├── tsconfig.build.json
 ├── .env.example
 └── README.md
 ```
@@ -67,8 +75,8 @@ gestao-api/
 | Item | Convenção |
 |------|-----------|
 | Arquivos | `kebab-case.ts` |
-| Rotas Fastify | prefixo `/v1/<recurso>` |
-| Handlers | `async function` + try/catch no plugin de erro |
+| Controllers NestJS | prefixo `@Controller('v1/<recurso>')` |
+| Handlers | métodos async no service; erros via `HttpException` |
 | SQL | sempre parametrizado; nunca concatenação |
 | Commits | português ou inglês — frases curtas no imperativo |
 | Branches | `main` protegida; features `feat/nome` |
@@ -77,9 +85,9 @@ gestao-api/
 
 ```json
 {
-  "dev": "tsx watch src/server.ts",
-  "build": "tsc -p tsconfig.build.json",
-  "start": "node dist/server.js",
+  "dev": "nest start --watch",
+  "build": "nest build",
+  "start": "node dist/main.js",
   "test": "vitest run",
   "test:integration": "vitest run --config vitest.integration.config.ts",
   "lint": "eslint src",
@@ -93,7 +101,7 @@ gestao-api/
 | Origem (`pibrr/`) | Destino |
 |-------------------|---------|
 | `app/api/auth/mobile/route.ts` | `src/modules/auth/` |
-| `lib/mobile-auth.ts` | `src/middleware/authenticate.ts` |
+| `lib/mobile-auth.ts` | `src/common/guards/jwt-auth.guard.ts` |
 | `lib/mobile-auth-user.ts` | `src/modules/auth/auth.service.ts` |
 | `lib/auth.ts` (NextAuth) | Fase 2 — `src/modules/auth/web/` ou BFF no Next |
 | `lib/permissions.ts` | `src/lib/permissions.ts` |
@@ -104,21 +112,21 @@ gestao-api/
 ## Dependências principais (planejadas)
 
 ```text
-fastify
-@fastify/cors
-@fastify/helmet
-@fastify/multipart
-@fastify/rate-limit
+@nestjs/common
+@nestjs/core
+@nestjs/platform-express
+@nestjs/config
+@nestjs/throttler
+@nestjs/schedule
 pg
 zod
+class-validator
+class-transformer
 jose
 google-auth-library
 firebase-admin
 web-push
 expo-server-sdk
-pino
-pino-pretty (dev)
-dotenv
 ```
 
 ## Compatibilidade com clientes existentes

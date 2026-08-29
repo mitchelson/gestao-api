@@ -18,7 +18,7 @@ Leia na ordem:
 |---|-----------|----------|
 | 1 | [docs/01-visao-e-escopo.md](./docs/01-visao-e-escopo.md) | Produto, fronteiras, o que **não** entra |
 | 2 | [docs/02-system-design.md](./docs/02-system-design.md) | Arquitetura, diagramas, fluxos |
-| 3 | [docs/03-stack-e-estrutura.md](./docs/03-stack-e-estrutura.md) | Fastify, pastas, convenções de código |
+| 3 | [docs/03-stack-e-estrutura.md](./docs/03-stack-e-estrutura.md) | NestJS, pastas, convenções de código |
 | 4 | [docs/04-banco-dados-vps.md](./docs/04-banco-dados-vps.md) | `pibrr_gestao`, secrets, conexão |
 | 5 | [docs/05-autenticacao-e-permissoes.md](./docs/05-autenticacao-e-permissoes.md) | JWT mobile, web, roles, accounts |
 | 6 | [docs/06-modulos-e-api-v1.md](./docs/06-modulos-e-api-v1.md) | Catálogo completo de endpoints |
