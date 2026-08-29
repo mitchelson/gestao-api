@@ -41,13 +41,18 @@ Hoje a API vive em `pibrr/app/api/*` + `pibrr/lib/*` (Next.js na Vercel, banco n
 - App mobile: `../pib-app/`
 - Vendas (domínio separado): `../vendas-pibrr/`
 
-## Desenvolvimento local (quando implementado)
+## Desenvolvimento local
 
 ```bash
 cp .env.example .env
+# Configure DATABASE_URL (túnel SSH para VPS)
 npm ci
 npm run dev
 ```
+
+API disponível em `http://127.0.0.1:3060` com prefixo `/v1/*`.
+
+Endpoints principais: `/health`, `/v1/auth/mobile`, `/v1/users/me`, `/v1/escalas/minhas`, etc. Ver [docs/06-modulos-e-api-v1.md](./docs/06-modulos-e-api-v1.md).
 
 ## Deploy
 

@@ -1,4 +1,5 @@
 import 'reflect-metadata';
+import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 
@@ -10,6 +11,23 @@ async function bootstrap() {
   if (process.env.TRUST_PROXY === 'true') {
     app.getHttpAdapter().getInstance().set('trust proxy', true);
   }
+
+  const corsOrigins = process.env.CORS_ORIGINS?.split(',')
+    .map((o) => o.trim())
+    .filter(Boolean);
+
+  if (corsOrigins?.length) {
+    app.enableCors({ origin: corsOrigins, credentials: true });
+  } else {
+    app.enableCors();
+  }
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+    }),
+  );
 
   const port = Number(process.env.PORT ?? 3060);
   const host = process.env.HOST ?? '127.0.0.1';

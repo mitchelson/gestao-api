@@ -1,16 +1,14 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { Test } from '@nestjs/testing';
 import { HealthController } from '../src/health/health.controller';
+import type { DatabaseService } from '../src/database/database.service';
 
 test('health response shape', async () => {
-  const moduleRef = await Test.createTestingModule({
-    controllers: [HealthController],
-  }).compile();
-
-  const controller = moduleRef.get(HealthController);
-  const response = controller.getHealth();
+  const database = { ping: async () => true } as Pick<DatabaseService, 'ping'>;
+  const controller = new HealthController(database as DatabaseService);
+  const response = await controller.getHealth();
 
   assert.equal(response.status, 'ok');
+  assert.equal(response.db, 'connected');
   assert.equal(typeof response.version, 'string');
 });
