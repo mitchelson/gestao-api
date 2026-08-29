@@ -16,6 +16,7 @@ import {
   syncMinistryLeaderRole,
 } from '../../lib/account-roles';
 import { sql } from '../../lib/sql';
+import { mapRowDates } from '../../lib/dates';
 import { AuthorizationService } from '../../common/services/authorization.service';
 import type { RequestUser } from '../../common/types/auth.types';
 
@@ -67,11 +68,14 @@ export class UsersService {
 
   async getIndisponibilidades(userId: string) {
     const rows = await sql`
-      SELECT * FROM user_indisponibilidades
-      WHERE user_id = ${userId} AND data_fim >= CURRENT_DATE
+      SELECT id, user_id, data_inicio, data_fim, motivo, criado_em
+      FROM user_indisponibilidades
+      WHERE user_id = ${userId}::uuid AND data_fim >= CURRENT_DATE
       ORDER BY data_inicio ASC
     `;
-    return rows;
+    return rows.map((row) =>
+      mapRowDates(row as Record<string, unknown>, ['data_inicio', 'data_fim']),
+    );
   }
 
   async createIndisponibilidade(
@@ -85,14 +89,14 @@ export class UsersService {
 
     const rows = await sql`
       INSERT INTO user_indisponibilidades (user_id, data_inicio, data_fim, motivo)
-      VALUES (${userId}, ${data_inicio}, ${data_fim}, ${motivo || null})
-      RETURNING *
+      VALUES (${userId}::uuid, ${data_inicio}::date, ${data_fim}::date, ${motivo || null})
+      RETURNING id, user_id, data_inicio, data_fim, motivo, criado_em
     `;
-    return rows[0];
+    return mapRowDates(rows[0] as Record<string, unknown>, ['data_inicio', 'data_fim']);
   }
 
   async deleteIndisponibilidade(userId: string, id: string) {
-    await sql`DELETE FROM user_indisponibilidades WHERE id = ${id} AND user_id = ${userId}`;
+    await sql`DELETE FROM user_indisponibilidades WHERE id = ${id}::uuid AND user_id = ${userId}::uuid`;
     return { ok: true };
   }
 

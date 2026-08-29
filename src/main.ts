@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { apiCompatMiddleware } from './common/middleware/api-compat.middleware';
 import { loadEnvFiles } from './lib/load-env';
@@ -8,11 +9,14 @@ import { loadEnvFiles } from './lib/load-env';
 loadEnvFiles();
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: process.env.NODE_ENV === 'test' ? false : undefined,
   });
 
   app.use(apiCompatMiddleware);
+
+  const uploadDir = process.env.UPLOAD_DIR ?? '/var/gestao-api/uploads';
+  app.useStaticAssets(uploadDir, { prefix: '/uploads/' });
 
   if (process.env.TRUST_PROXY === 'true') {
     app.getHttpAdapter().getInstance().set('trust proxy', true);

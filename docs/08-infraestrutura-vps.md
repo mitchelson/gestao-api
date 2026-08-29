@@ -78,6 +78,12 @@ server {
     ssl_certificate     /etc/letsencrypt/live/gestao-api.pibrr.com/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/gestao-api.pibrr.com/privkey.pem;
 
+    location /uploads/ {
+        alias /var/gestao-api/uploads/;
+        access_log off;
+        expires 30d;
+    }
+
     location / {
         proxy_pass http://127.0.0.1:3060;
         proxy_http_version 1.1;
