@@ -68,7 +68,7 @@ App / site **não** mudam ainda.
 2. [x] Smoke: `curl …/api/users/me` → 401 (não 404) — 2026-08-29
 3. [x] `AUTH_JWT_SECRET` / `AUTH_MOBILE_SECRET` alinhados com `AUTH_SECRET` na VPS
 4. [x] Google Client IDs carregados (token inválido → `Invalid Compact JWS`, não “não configurado”)
-5. [ ] OTA `pib-app`: `EXPO_PUBLIC_API_URL=https://gestao-api.pibrr.com` (paths `/api` intactos)
+5. [x] OTA `pib-app`: `EXPO_PUBLIC_API_URL=https://gestao-api.pibrr.com` (group `eb059135…`, 2026-08-29)
 6. [ ] Depois: web `pibrr` → BFF / `GESTAO_API_URL`
 7. [ ] Remover rotas `/api` do Next quando estável
 
