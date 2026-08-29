@@ -57,20 +57,18 @@ bash /opt/gestao-api/deploy/post-deploy.sh
 ### 3) Teste manual (ainda sem cutover)
 
 - [x] `curl -s https://gestao-api.pibrr.com/health` → ok
-- [ ] `POST /v1/auth/mobile` com idToken Google
-- [ ] (opcional) Apple / Firebase no mesmo endpoint
+- [x] `POST /v1/auth/mobile` com idToken inválido → verifica Google (não “Client ID não configurado”)
+- [ ] (opcional) Login real Google / Apple / Firebase no device
 
-App / site **não** mudam ainda.
-
-## Cutover app (quando decidir)
+## Cutover app
 
 1. [x] Deploy gestao-api com middleware `/api`→`/v1` + `GET /v1/admin/dashboard`
 2. [x] Smoke: `curl …/api/users/me` → 401 (não 404) — 2026-08-29
 3. [x] `AUTH_JWT_SECRET` / `AUTH_MOBILE_SECRET` alinhados com `AUTH_SECRET` na VPS
-4. [x] Google Client IDs carregados (token inválido → `Invalid Compact JWS`, não “não configurado”)
-5. [x] OTA `pib-app`: `EXPO_PUBLIC_API_URL=https://gestao-api.pibrr.com` (group `eb059135…`, 2026-08-29)
-6. [ ] Depois: web `pibrr` → BFF / `GESTAO_API_URL`
-7. [ ] Remover rotas `/api` do Next quando estável
+4. [x] Google Client IDs carregados no processo (fix load-env / PM2)
+5. [x] OTA `pib-app` → `https://gestao-api.pibrr.com` — group `adc7cc9e-d962-4c29-bbd0-51e74f8201a9` (2026-08-29)
+6. [ ] Web `pibrr` → BFF / `GESTAO_API_URL`
+7. [ ] Remover rotas `/api` do Next quando estável (app já na gestao-api; Next ainda serve web)
 
 ## Comandos úteis na VPS
 
