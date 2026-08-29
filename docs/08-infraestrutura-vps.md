@@ -16,7 +16,7 @@
 Internet
     │
     ▼
-nginx (443) ──► gestao-api.zenvixlabs.app  → 127.0.0.1:3060
+nginx (443) ──► gestao-api.pibrr.com       → 127.0.0.1:3060
               ──► caixa-api (3050)
               ──► school-backend (outra porta)
               ──► outros serviços
@@ -73,10 +73,10 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE O
 ```nginx
 server {
     listen 443 ssl http2;
-    server_name gestao-api.zenvixlabs.app;
+    server_name gestao-api.pibrr.com;
 
-    ssl_certificate     /etc/letsencrypt/live/gestao-api.zenvixlabs.app/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/gestao-api.zenvixlabs.app/privkey.pem;
+    ssl_certificate     /etc/letsencrypt/live/gestao-api.pibrr.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/gestao-api.pibrr.com/privkey.pem;
 
     location / {
         proxy_pass http://127.0.0.1:3060;
@@ -89,8 +89,6 @@ server {
     }
 }
 ```
-
-Alternativa futura: `api.pibrr.com` com mesmo upstream.
 
 ## PM2
 

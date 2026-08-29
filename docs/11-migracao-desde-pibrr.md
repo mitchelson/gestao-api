@@ -68,7 +68,7 @@ Para cada rota migrada:
 curl -H "Authorization: Bearer $TOKEN" https://www.pibrr.com/api/users/me
 
 # Novo
-curl -H "Authorization: Bearer $TOKEN" https://gestao-api.zenvixlabs.app/v1/users/me
+curl -H "Authorization: Bearer $TOKEN" https://gestao-api.pibrr.com/v1/users/me
 
 # diff JSON (ignorar campos de timestamp se necessário)
 ```
@@ -78,7 +78,7 @@ curl -H "Authorization: Bearer $TOKEN" https://gestao-api.zenvixlabs.app/v1/user
 ## Cutover do app mobile
 
 1. Publicar gestao-api com auth + users/me estáveis
-2. Build OTA `pib-app` com `EXPO_PUBLIC_API_URL=https://gestao-api.zenvixlabs.app`
+2. Build OTA `pib-app` com `EXPO_PUBLIC_API_URL=https://gestao-api.pibrr.com`
 3. Monitorar Sentry / logs 48h
 4. Se OK, migrar próximo módulo (escalas)
 
@@ -114,9 +114,8 @@ Listar diferenças entre schema Neon dump e produção antes de qualquer ALTER.
 
 ## DNS e SSL
 
-1. Criar registro `gestao-api.zenvixlabs.app` → `31.97.169.130`
-2. `certbot --nginx -d gestao-api.zenvixlabs.app`
-3. Opcional futuro: `api.pibrr.com` CNAME
+1. Criar registro `gestao-api.pibrr.com` → `31.97.169.130`
+2. `certbot --nginx -d gestao-api.pibrr.com`
 
 ---
 

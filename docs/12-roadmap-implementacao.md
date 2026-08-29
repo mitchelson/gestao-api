@@ -91,7 +91,7 @@ Cronograma sugerido em fases incrementais. Cada fase entrega valor testável em 
 - [ ] Role `gestao_api` least privilege
 - [ ] Denylist JWT logout (opcional)
 - [ ] Staging branch (opcional)
-- [ ] `api.pibrr.com` DNS
+- [ ] `gestao-api.pibrr.com` DNS + certbot
 
 ---
 

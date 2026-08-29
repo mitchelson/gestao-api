@@ -81,7 +81,7 @@ ssh -L 5433:127.0.0.1:5433 root@31.97.169.130
 
 | Cliente | Variável | Valor após cutover |
 |---------|----------|-------------------|
-| pib-app | `EXPO_PUBLIC_API_URL` | `https://gestao-api.zenvixlabs.app` |
+| pib-app | `EXPO_PUBLIC_API_URL` | `https://gestao-api.pibrr.com` |
 | pibrr web | `GESTAO_API_URL` (futuro) | mesma URL |
 | gestao-web (futuro) | `NEXT_PUBLIC_API_URL` | mesma URL |
 

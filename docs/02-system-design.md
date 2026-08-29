@@ -35,7 +35,7 @@
 │ VPS srv871876 (31.97.169.130)                                   │
 │                                                                 │
 │  nginx :443                                                     │
-│    ├── gestao-api.zenvixlabs.app → 127.0.0.1:3060              │
+│    ├── gestao-api.pibrr.com      → 127.0.0.1:3060              │
 │    ├── caixa-api.zenvixlabs.app  → 127.0.0.1:3050              │
 │    └── ...                                                      │
 │                                                                 │

@@ -7,7 +7,7 @@ Backend dedicado da **gestão da igreja** (PIB Roraima): membros, escalas, feed,
 | **Status** | Documentação + scaffold — implementação pendente |
 | **Banco** | Postgres `pibrr_gestao` na VPS (`31.97.169.130:5433`) |
 | **Hospedagem alvo** | VPS + PM2 + nginx (mesmo padrão `school-backend`, `caixa-api`) |
-| **URL produção (planejada)** | `https://gestao-api.zenvixlabs.app` ou `https://api.pibrr.com` |
+| **URL produção (planejada)** | `https://gestao-api.pibrr.com` |
 | **Consumidores** | `pib-app` (Expo), futuro `gestao-web`, transição de `pibrr` (Next na Vercel) |
 
 ## Documentação

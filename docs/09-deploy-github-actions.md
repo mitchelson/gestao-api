@@ -173,7 +173,7 @@ Executar **uma vez** na VPS antes do primeiro GitHub Actions:
 ```bash
 mkdir -p /opt/gestao-api
 # Criar /root/.secrets/gestao_api_env com AUTH_JWT_SECRET, PORT=3060, etc.
-# Certbot para gestao-api.zenvixlabs.app
+# Certbot para gestao-api.pibrr.com
 # nginx site enabled
 # pm2 startup
 ```
@@ -193,14 +193,14 @@ Manter últimas 3 releases em `/opt/gestao-api/releases/` (melhoria fase 2).
 
 | Ambiente | Branch | URL |
 |----------|--------|-----|
-| Produção | `main` | `https://gestao-api.zenvixlabs.app` |
+| Produção | `main` | `https://gestao-api.pibrr.com` |
 | Staging | — | não previsto na v1 (usar branch local + túnel) |
 
 ---
 
 ## Checklist pós-deploy
 
-- [ ] `curl https://gestao-api.zenvixlabs.app/health` → 200
+- [ ] `curl https://gestao-api.pibrr.com/health` → 200
 - [ ] `POST /v1/auth/mobile` com token de teste
 - [ ] App com `EXPO_PUBLIC_API_URL` apontando para nova URL
 - [ ] Logs PM2 sem erro de conexão DB
