@@ -64,12 +64,13 @@ App / site **não** mudam ainda.
 
 ## Cutover app (quando decidir)
 
-1. [ ] Deploy gestao-api com middleware `/api`→`/v1` + `GET /v1/admin/dashboard`
-2. [ ] Alinhar `AUTH_JWT_SECRET` com Vercel `AUTH_SECRET` (ou force re-login)
-3. [ ] Smoke: `curl -s https://gestao-api.pibrr.com/api/users/me` → 401 (não 404)
-4. [ ] OTA `pib-app`: `EXPO_PUBLIC_API_URL=https://gestao-api.pibrr.com` (paths `/api` intactos)
-5. [ ] Depois: web `pibrr` → BFF / `GESTAO_API_URL`
-6. [ ] Remover rotas `/api` do Next quando estável
+1. [x] Deploy gestao-api com middleware `/api`→`/v1` + `GET /v1/admin/dashboard`
+2. [x] Smoke: `curl …/api/users/me` → 401 (não 404) — 2026-08-29
+3. [x] `AUTH_JWT_SECRET` / `AUTH_MOBILE_SECRET` alinhados com `AUTH_SECRET` na VPS
+4. [ ] Login Google real (`POST /v1/auth/mobile`) — bloqueado por env vazio no PM2 (fix em andamento)
+5. [ ] OTA `pib-app`: `EXPO_PUBLIC_API_URL=https://gestao-api.pibrr.com` (paths `/api` intactos)
+6. [ ] Depois: web `pibrr` → BFF / `GESTAO_API_URL`
+7. [ ] Remover rotas `/api` do Next quando estável
 
 ## Comandos úteis na VPS
 

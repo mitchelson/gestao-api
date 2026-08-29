@@ -7,6 +7,8 @@ module.exports = {
       cwd: '/opt/gestao-api',
       instances: 1,
       exec_mode: 'fork',
+      // Secrets vêm de .env.production (post-deploy + loadEnvFiles no boot).
+      // Não espelhar GOOGLE_* aqui — valores vazios no PM2 bloqueiam o dotenv.
       env_production: {
         NODE_ENV: 'production',
         PORT: 3060,

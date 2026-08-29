@@ -3,6 +3,9 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { apiCompatMiddleware } from './common/middleware/api-compat.middleware';
+import { loadEnvFiles } from './lib/load-env';
+
+loadEnvFiles();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {

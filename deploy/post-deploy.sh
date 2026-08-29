@@ -61,9 +61,9 @@ if [ -d db/migrations ] && [ -f scripts/migrate.sh ]; then
   bash scripts/migrate.sh
 fi
 
-echo "==> PM2 reload..."
-"${PM2_BIN}" reload ecosystem.config.cjs --env production --update-env \
-  || "${PM2_BIN}" start ecosystem.config.cjs --env production
+echo "==> PM2 restart (delete+start evita env vazio residual)..."
+"${PM2_BIN}" delete gestao-api 2>/dev/null || true
+"${PM2_BIN}" start ecosystem.config.cjs --env production
 "${PM2_BIN}" save
 
 sleep 2
