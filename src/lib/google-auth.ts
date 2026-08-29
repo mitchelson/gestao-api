@@ -5,7 +5,13 @@ const GOOGLE_JWKS = jose.createRemoteJWKSet(
 )
 
 export function getValidGoogleAudiences() {
+  const fromList = (process.env.GOOGLE_CLIENT_IDS ?? "")
+    .split(",")
+    .map((id) => id.trim())
+    .filter(Boolean)
+
   return [
+    ...fromList,
     process.env.AUTH_GOOGLE_ID,
     process.env.GOOGLE_CLIENT_ID,
     process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_IOS,

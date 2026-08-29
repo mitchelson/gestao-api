@@ -4,72 +4,73 @@ Cronograma sugerido em fases incrementais. Cada fase entrega valor testável em 
 
 ---
 
-## Fase 0 — Fundação (semana 1) ✅ documentação
+## Fase 0 — Fundação (semana 1) ✅
 
 - [x] Repositório `gestao-api` com docs completas
 - [x] Workflows CI/CD scaffold
-- [ ] Bootstrap VPS: `/opt/gestao-api`, nginx, certbot, secrets
-- [ ] Secrets GitHub: `VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY`
+- [x] Bootstrap VPS: `/opt/gestao-api`, nginx, certbot, secrets base
+- [ ] Secrets GitHub: `VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY` / `VPS_PASSWORD` (manual — ver [13-go-live-checklist.md](./13-go-live-checklist.md))
 
-**Entregável:** repo no GitHub; VPS pronta para receber deploy.
+**Entregável:** repo no GitHub; VPS com API no ar.
 
 ---
 
-## Fase 1 — MVP API (semana 2–3)
+## Fase 1 — MVP API (semana 2–3) ✅ código + deploy
 
 ### Código
 
-- [ ] NestJS 11 + TypeScript + `pg` pool
-- [ ] `GET /health` (DB ping)
-- [ ] `POST /v1/auth/mobile` (Google + Apple)
-- [ ] `JwtAuthGuard` (validação JWT)
-- [ ] `GET /v1/users/me`
-- [ ] `GET /v1/auth/permissions`
-- [ ] Logger (NestJS), CORS (`@nestjs/config`), rate-limit auth (`@nestjs/throttler`)
+- [x] NestJS 11 + TypeScript + `pg` pool
+- [x] `GET /health` (DB ping)
+- [x] `POST /v1/auth/mobile` (Google + Apple)
+- [x] `JwtAuthGuard` (validação JWT)
+- [x] `GET /v1/users/me`
+- [x] `GET /v1/auth/permissions`
+- [x] Logger (NestJS), CORS (`@nestjs/config`), rate-limit (`@nestjs/throttler`)
 
 ### Infra
 
-- [ ] Primeiro deploy automático main → VPS
-- [ ] `curl` health público OK
+- [x] Deploy na VPS (manual bootstrap; CI aguarda secrets GitHub)
+- [x] `curl https://gestao-api.pibrr.com/health` → 200
 
 ### Validação
 
-- [ ] Login no app contra gestao-api (build dev)
+- [ ] Preencher Google/Apple/Firebase em `/root/.secrets/gestao_api_env`
+- [ ] Login de teste contra gestao-api (sem cutover do app)
 - [ ] Paridade JSON com legado em `/users/me`
 
-**Entregável:** app pode autenticar e ver perfil via nova API.
+**Entregável:** API autenticável; app ainda no legado até cutover.
 
 ---
 
-## Fase 2 — Core membro (semana 4–5)
+## Fase 2 — Core membro (semana 4–5) ✅ código
 
-- [ ] `GET /v1/escalas/minhas`
-- [ ] `GET /v1/eventos` (filtros futuros)
-- [ ] `GET/POST /v1/users/me/indisponibilidades`
-- [ ] `GET /v1/users/me/pendencias`
-- [ ] `GET/POST /v1/dons-espirituais`
-- [ ] `GET /v1/notifications` + read-all
-- [ ] `POST /v1/push/expo`
+- [x] `GET /v1/escalas/minhas`
+- [x] `GET /v1/eventos` (filtros futuros)
+- [x] `GET/POST /v1/users/me/indisponibilidades`
+- [x] `GET /v1/users/me/pendencias`
+- [x] `GET/POST /v1/dons-espirituais`
+- [x] `GET /v1/notifications` + read-all
+- [x] `POST /v1/push/expo`
 
-**Entregável:** abas Serviço e Perfil do app funcionam 100% na gestao-api.
+**Entregável:** código pronto; cutover OTA **pendente** (decisão explícita).
 
 ### Cutover
 
-- [ ] OTA production com `EXPO_PUBLIC_API_URL`
+- [ ] OTA production com `EXPO_PUBLIC_API_URL=https://gestao-api.pibrr.com`
 
 ---
 
-## Fase 3 — Líderes e admin (semana 6–8)
+## Fase 3 — Líderes e admin (semana 6–8) ✅ código
 
-- [ ] Módulo escalas CRUD + trocas + notify
-- [ ] Ministérios + funções
-- [ ] Eventos + modelos + posições
-- [ ] Visitantes + mensagens + responsáveis
-- [ ] Feed (posts, likes, comments)
-- [ ] Form ministérios + dons admin
-- [ ] Upload + config + contato + youtube
+- [x] Módulo escalas CRUD + trocas + notify
+- [x] Ministérios + funções
+- [x] Eventos + modelos + posições
+- [x] Visitantes + mensagens + responsáveis
+- [x] Feed (posts, likes, comments)
+- [x] Form ministérios + dons admin
+- [x] Upload + config + contato + youtube
 
-**Entregável:** painel web pode migrar fetch para gestao-api.
+**Entregável:** código pronto; painel web ainda no Next até Fase 4.
 
 ---
 
@@ -91,7 +92,7 @@ Cronograma sugerido em fases incrementais. Cada fase entrega valor testável em 
 - [ ] Role `gestao_api` least privilege
 - [ ] Denylist JWT logout (opcional)
 - [ ] Staging branch (opcional)
-- [ ] `gestao-api.pibrr.com` DNS + certbot
+- [ ] `gestao-api.pibrr.com` DNS + certbot ✅ (2026-08-29)
 
 ---
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Pós-deploy na VPS: env + PM2 reload. Padrão school-backend / zenvix-store.
+# Pós-deploy na VPS: sync env + PM2 reload. Padrão school-backend / zenvix-store.
 set -euo pipefail
 
 APP_DIR="/opt/gestao-api"
@@ -15,6 +15,7 @@ PM2_BIN="${PM2_BIN:-$(command -v pm2 || true)}"
 
 if [ -z "${NODE_BIN}" ] || [ -z "${PM2_BIN}" ]; then
   echo "Node ou PM2 não encontrado na VPS."
+  echo "Instale nvm + Node 22 + pm2 (igual school-backend)."
   exit 127
 fi
 
@@ -23,13 +24,36 @@ echo "→ pm2:  ${PM2_BIN}"
 
 cd "${APP_DIR}"
 
-# Secrets na VPS (não vão no GitHub)
-set -a
-[ -f /root/.secrets/gestao_api_env ] && source /root/.secrets/gestao_api_env
-[ -f /root/.secrets/pibrr_gestao_database_url ] && source /root/.secrets/pibrr_gestao_database_url
-set +a
+# Monta .env.production a partir dos secrets da VPS (Nest ConfigModule lê .env)
+if [ ! -f /root/.secrets/gestao_api_env ]; then
+  echo "❌ /root/.secrets/gestao_api_env ausente"
+  exit 1
+fi
+
+{
+  cat /root/.secrets/gestao_api_env
+  echo
+  if [ -f /root/.secrets/pibrr_gestao_database_url ]; then
+    # arquivo pode ser URL pura ou export DATABASE_URL=...
+    db_raw="$(tr -d '\r' < /root/.secrets/pibrr_gestao_database_url | head -1)"
+    if [[ "${db_raw}" == export\ DATABASE_URL=* ]]; then
+      echo "${db_raw#export }"
+    elif [[ "${db_raw}" == DATABASE_URL=* ]]; then
+      echo "${db_raw}"
+    else
+      echo "DATABASE_URL=${db_raw}"
+    fi
+  fi
+} > .env.production
+
+chmod 600 .env.production
+ln -sf .env.production .env
 
 export NODE_ENV=production
+set -a
+# shellcheck disable=SC1091
+. ./.env.production
+set +a
 
 if [ -d db/migrations ] && [ -f scripts/migrate.sh ]; then
   echo "==> Rodando migrations..."
