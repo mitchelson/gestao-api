@@ -173,15 +173,19 @@ export class EscalasService {
     const { status, funcao } = body;
 
     if (isOwner && user.role === 'membro') {
+      if (status == null) {
+        throw new BadRequestException('status obrigatório');
+      }
       const rows =
         await sql`UPDATE escalas SET status = ${status} WHERE id = ${id} RETURNING *`;
       return rows[0];
     }
 
+    // null (não undefined) para COALESCE com campos omitidos
     const rows = await sql`
       UPDATE escalas SET
-        status = COALESCE(${status}, status),
-        funcao = COALESCE(${funcao}, funcao)
+        status = COALESCE(${status ?? null}, status),
+        funcao = COALESCE(${funcao ?? null}, funcao)
       WHERE id = ${id}
       RETURNING *
     `;

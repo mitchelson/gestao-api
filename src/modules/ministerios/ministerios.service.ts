@@ -86,12 +86,12 @@ export class MinisteriosService {
 
     const rows = await sql`
       UPDATE ministerios SET
-        nome = COALESCE(${nome}, nome),
-        descricao = COALESCE(${descricao}, descricao),
-        cor = COALESCE(${cor}, cor),
-        icone = COALESCE(${icone}, icone),
-        ativo = COALESCE(${ativo}, ativo),
-        ordem = COALESCE(${ordem}, ordem),
+        nome = COALESCE(${nome ?? null}, nome),
+        descricao = COALESCE(${descricao ?? null}, descricao),
+        cor = COALESCE(${cor ?? null}, cor),
+        icone = COALESCE(${icone ?? null}, icone),
+        ativo = COALESCE(${ativo ?? null}, ativo),
+        ordem = COALESCE(${ordem ?? null}, ordem),
         form_obrigatorio = COALESCE(${form_obrigatorio ?? null}, form_obrigatorio)
       WHERE id = ${id}
       RETURNING *
