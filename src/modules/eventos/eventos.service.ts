@@ -108,16 +108,15 @@ export class EventosService {
   ) {
     this.authz.requireAdmin(user);
 
-    const {
-      titulo,
-      data,
-      horario,
-      descricao,
-      tipo,
-      observacoes,
-      repertorio_ministerio_id,
-      repertorio_funcao,
-    } = body;
+    // postgres.js rejeita `undefined` em parâmetros (UNDEFINED_VALUE)
+    const titulo = body.titulo ?? null;
+    const data = body.data ?? null;
+    const horario = body.horario ?? null;
+    const descricao = body.descricao ?? null;
+    const tipo = body.tipo ?? null;
+    const observacoes = body.observacoes ?? null;
+    const repertorio_ministerio_id = body.repertorio_ministerio_id || null;
+    const repertorio_funcao = body.repertorio_funcao || null;
 
     const rows = await sql`
       UPDATE eventos SET
@@ -127,8 +126,8 @@ export class EventosService {
         descricao = COALESCE(${descricao}, descricao),
         tipo = COALESCE(${tipo}, tipo),
         observacoes = COALESCE(${observacoes}, observacoes),
-        repertorio_ministerio_id = ${repertorio_ministerio_id ?? null},
-        repertorio_funcao = ${repertorio_funcao ?? null}
+        repertorio_ministerio_id = ${repertorio_ministerio_id},
+        repertorio_funcao = ${repertorio_funcao}
       WHERE id = ${id}
       RETURNING *
     `;
