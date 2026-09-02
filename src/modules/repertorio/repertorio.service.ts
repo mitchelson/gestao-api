@@ -7,9 +7,31 @@ import { sql } from '../../lib/sql';
 
 @Injectable()
 export class RepertorioService {
-  private async canEdit(userId: string, eventoId: string): Promise<boolean> {
+  private async canEdit(
+    userId: string,
+    eventoId: string,
+    roleHint?: string,
+  ): Promise<boolean> {
+    if (roleHint === 'admin') return true;
+
     const user = await sql`SELECT role FROM users WHERE id = ${userId}`;
     if (user[0]?.role === 'admin') return true;
+
+    // Papel admin em account_roles (sistema novo de permissões)
+    try {
+      const adminRole = await sql`
+        SELECT 1
+        FROM account_roles ar
+        JOIN roles r ON r.id = ar.role_id
+        WHERE ar.account_id = ${userId}
+          AND r.name = 'admin'
+          AND (ar.is_active IS NULL OR ar.is_active = true)
+        LIMIT 1
+      `;
+      if (adminRole.length > 0) return true;
+    } catch {
+      // tabela pode não existir em alguns ambientes — segue checagem por ministério
+    }
 
     const evento =
       await sql`SELECT repertorio_ministerio_id, repertorio_funcao FROM eventos WHERE id = ${eventoId}`;
@@ -31,14 +53,14 @@ export class RepertorioService {
     return true;
   }
 
-  async get(eventoId: string, userId?: string) {
+  async get(eventoId: string, userId?: string, roleHint?: string) {
     const items = await sql`
       SELECT * FROM repertorio_items WHERE evento_id = ${eventoId} ORDER BY ordem, criado_em
     `;
 
     let canEditRepertoire = false;
     if (userId) {
-      canEditRepertoire = await this.canEdit(userId, eventoId);
+      canEditRepertoire = await this.canEdit(userId, eventoId, roleHint);
     }
 
     return { items, canEdit: canEditRepertoire };
@@ -55,13 +77,14 @@ export class RepertorioService {
         observacoes?: string;
       }>;
     },
+    roleHint?: string,
   ) {
     const { evento_id, items } = body;
     if (!evento_id || !Array.isArray(items)) {
       throw new BadRequestException('evento_id and items required');
     }
 
-    if (!(await this.canEdit(userId, evento_id))) {
+    if (!(await this.canEdit(userId, evento_id, roleHint))) {
       throw new ForbiddenException('Forbidden');
     }
 
@@ -80,10 +103,10 @@ export class RepertorioService {
     return result;
   }
 
-  async deleteAll(userId: string, evento_id: string) {
+  async deleteAll(userId: string, evento_id: string, roleHint?: string) {
     if (!evento_id) throw new BadRequestException('evento_id required');
 
-    if (!(await this.canEdit(userId, evento_id))) {
+    if (!(await this.canEdit(userId, evento_id, roleHint))) {
       throw new ForbiddenException('Forbidden');
     }
 

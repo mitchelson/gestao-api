@@ -27,13 +27,13 @@ export class RepertorioController {
     if (!eventoId) {
       throw new BadRequestException('evento_id required');
     }
-    return this.repertorioService.get(eventoId, user?.userId);
+    return this.repertorioService.get(eventoId, user?.userId, user?.role);
   }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
   save(@CurrentUser() user: RequestUser, @Body() body: Record<string, unknown>) {
-    return this.repertorioService.save(user.userId, body);
+    return this.repertorioService.save(user.userId, body, user.role);
   }
 
   @Delete()
@@ -41,6 +41,6 @@ export class RepertorioController {
     @CurrentUser() user: RequestUser,
     @Body() body: { evento_id: string },
   ) {
-    return this.repertorioService.deleteAll(user.userId, body.evento_id);
+    return this.repertorioService.deleteAll(user.userId, body.evento_id, user.role);
   }
 }
