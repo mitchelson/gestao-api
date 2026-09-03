@@ -16,7 +16,10 @@ export class MinisteriosService {
   async list() {
     const rows = await sql`
       SELECT m.*,
-        (SELECT count(*)::int FROM ministerio_membros mm WHERE mm.ministerio_id = m.id) as total_membros
+        (SELECT count(*)::int FROM ministerio_membros mm WHERE mm.ministerio_id = m.id) as total_membros,
+        (SELECT json_agg(json_build_object('nome', u.nome, 'is_lider', mm.is_lider))
+         FROM ministerio_membros mm JOIN users u ON u.id = mm.user_id
+         WHERE mm.ministerio_id = m.id AND mm.is_lider = true) as lideres
       FROM ministerios m ORDER BY m.ordem ASC, m.nome ASC
     `;
     return rows;

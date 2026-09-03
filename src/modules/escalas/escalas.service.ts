@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { sendPushToUser } from '../../lib/push';
 import { sql } from '../../lib/sql';
+import { mapRowDates } from '../../lib/dates';
 import { AuthorizationService } from '../../common/services/authorization.service';
 import type { RequestUser } from '../../common/types/auth.types';
 
@@ -202,7 +203,27 @@ export class EscalasService {
     return { ok: true };
   }
 
-  async listMinhas(userId: string) {
+  async listMinhas(userId: string, onlyMine = false) {
+    if (onlyMine) {
+      const eventos = await sql`
+        SELECT e.id, e.titulo, e.data, e.horario, e.observacoes,
+               true as is_escalado,
+               es.id as escala_id, es.funcao as minha_funcao, es.status as meu_status,
+               es.observacao as minha_observacao, es.ministerio_id as ministerio_id,
+               m.nome as ministerio, m.icone, m.cor,
+               (SELECT count(*)::int FROM escalas WHERE evento_id = e.id) as total_escalados
+        FROM eventos e
+        INNER JOIN escalas es ON es.evento_id = e.id AND es.user_id = ${userId}
+        INNER JOIN ministerios m ON m.id = es.ministerio_id
+        WHERE e.data >= CURRENT_DATE
+        ORDER BY e.data ASC
+        LIMIT 20
+      `;
+      return eventos.map((row) =>
+        mapRowDates(row as Record<string, unknown>, ['data']),
+      );
+    }
+
     const eventos = await sql`
       SELECT e.id, e.titulo, e.data, e.horario, e.observacoes,
              CASE WHEN es.user_id IS NOT NULL THEN true ELSE false END as is_escalado,
@@ -217,7 +238,9 @@ export class EscalasService {
       ORDER BY e.data ASC
       LIMIT 20
     `;
-    return eventos;
+    return eventos.map((row) =>
+      mapRowDates(row as Record<string, unknown>, ['data']),
+    );
   }
 
   async listTrocas(userId: string) {

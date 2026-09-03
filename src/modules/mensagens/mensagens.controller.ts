@@ -10,11 +10,11 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
-import { Public } from '../../common/decorators/auth.decorators';
+import { Roles } from '../../common/decorators/auth.decorators';
 import { MensagensService } from './mensagens.service';
 
 @Controller('v1/mensagens')
-@Public()
+@Roles('admin', 'supervisor', 'lider')
 export class MensagensController {
   constructor(private readonly mensagensService: MensagensService) {}
 

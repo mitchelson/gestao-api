@@ -19,8 +19,11 @@ export class EscalasController {
   constructor(private readonly escalasService: EscalasService) {}
 
   @Get('minhas')
-  listMinhas(@CurrentUser() user: RequestUser) {
-    return this.escalasService.listMinhas(user.userId);
+  listMinhas(
+    @CurrentUser() user: RequestUser,
+    @Query('only') only?: string,
+  ) {
+    return this.escalasService.listMinhas(user.userId, only === 'mine');
   }
 
   @Get('trocas')

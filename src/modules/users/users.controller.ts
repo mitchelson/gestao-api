@@ -74,6 +74,11 @@ export class UsersController {
     return this.usersService.getPendencias(user.userId);
   }
 
+  @Get('me/inbox')
+  getInbox(@CurrentUser() user: RequestUser) {
+    return this.usersService.getInbox(user);
+  }
+
   @Get()
   listUsers(@CurrentUser() user: RequestUser) {
     return this.usersService.listUsers(user);

@@ -8,11 +8,11 @@ import {
   Param,
   Post,
 } from '@nestjs/common';
-import { Public } from '../../common/decorators/auth.decorators';
+import { Roles } from '../../common/decorators/auth.decorators';
 import { ResponsaveisService } from './responsaveis.service';
 
 @Controller('v1/responsaveis')
-@Public()
+@Roles('admin', 'supervisor', 'lider')
 export class ResponsaveisController {
   constructor(private readonly responsaveisService: ResponsaveisService) {}
 

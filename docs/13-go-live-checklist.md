@@ -67,9 +67,8 @@ bash /opt/gestao-api/deploy/post-deploy.sh
 3. [x] `AUTH_JWT_SECRET` / `AUTH_MOBILE_SECRET` alinhados com `AUTH_SECRET` na VPS
 4. [x] Google Client IDs carregados no processo (fix load-env / PM2)
 5. [x] OTA `pib-app` → `https://gestao-api.pibrr.com` — group `adc7cc9e-d962-4c29-bbd0-51e74f8201a9` (2026-08-29)
-6. [ ] Web `pibrr` → BFF / `GESTAO_API_URL`
-7. [ ] Remover rotas `/api` do Next quando estável (app já na gestao-api; Next ainda serve web)
-
+6. [x] Web `pibrr` → BFF / `GESTAO_API_URL` (`FEATURE_FLAG_GESTAO_BFF`, `lib/gestao-*.ts`)
+7. [ ] Remover SQL legado dos Route Handlers do Next quando estável 48h+ (flag off ainda reverte)
 ## Comandos úteis na VPS
 
 ```bash

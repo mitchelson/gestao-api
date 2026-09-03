@@ -9,14 +9,14 @@ import {
   Put,
   BadRequestException,
 } from '@nestjs/common';
-import { Public } from '../../common/decorators/auth.decorators';
+import { Public, Roles } from '../../common/decorators/auth.decorators';
 import { VisitantesService } from './visitantes.service';
 
 @Controller('v1/visitantes')
 export class VisitantesController {
   constructor(private readonly visitantesService: VisitantesService) {}
 
-  @Public()
+  @Roles('admin', 'supervisor', 'lider')
   @Get()
   async findAll() {
     try {
@@ -27,6 +27,7 @@ export class VisitantesController {
     }
   }
 
+  /** Cadastro público (formulário de visitantes). */
   @Public()
   @Post()
   async create(@Body() body: Record<string, unknown>) {
@@ -41,7 +42,7 @@ export class VisitantesController {
     }
   }
 
-  @Public()
+  @Roles('admin', 'supervisor', 'lider')
   @Get('mensagens-status')
   async mensagensStatus() {
     try {
@@ -56,7 +57,7 @@ export class VisitantesController {
     }
   }
 
-  @Public()
+  @Roles('admin', 'supervisor', 'lider')
   @Get(':id')
   async findOne(@Param('id') id: string) {
     try {
@@ -67,7 +68,7 @@ export class VisitantesController {
     }
   }
 
-  @Public()
+  @Roles('admin', 'supervisor', 'lider')
   @Put(':id')
   async update(@Param('id') id: string, @Body() body: Record<string, unknown>) {
     try {
@@ -78,7 +79,7 @@ export class VisitantesController {
     }
   }
 
-  @Public()
+  @Roles('admin', 'supervisor', 'lider')
   @Delete(':id')
   async remove(@Param('id') id: string) {
     try {

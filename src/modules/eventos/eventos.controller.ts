@@ -52,13 +52,21 @@ export class EventosController {
 
   @Post(':id/posicoes')
   @HttpCode(HttpStatus.CREATED)
-  createPosicao(@Param('id') id: string, @Body() body: Record<string, unknown>) {
-    return this.eventosService.createPosicao(id, body);
+  createPosicao(
+    @CurrentUser() user: RequestUser,
+    @Param('id') id: string,
+    @Body() body: Record<string, unknown>,
+  ) {
+    return this.eventosService.createPosicao(user, id, body);
   }
 
   @Delete(':id/posicoes')
-  deletePosicao(@Param('id') id: string, @Body() body: { posicao_id?: string }) {
-    return this.eventosService.deletePosicao(id, body.posicao_id);
+  deletePosicao(
+    @CurrentUser() user: RequestUser,
+    @Param('id') id: string,
+    @Body() body: { posicao_id?: string },
+  ) {
+    return this.eventosService.deletePosicao(user, id, body.posicao_id);
   }
 }
 

@@ -152,13 +152,16 @@ export class EventosService {
   }
 
   async createPosicao(
+    user: RequestUser,
     eventoId: string,
     body: { ministerio_id?: string; funcao?: string; quantidade?: number },
   ) {
+    this.authz.requireLiderOrAdmin(user);
     const { ministerio_id, funcao, quantidade } = body;
     if (!ministerio_id || !funcao) {
       throw new BadRequestException('ministerio_id e funcao obrigatórios');
     }
+    await this.authz.requireMinisterioAccess(user, ministerio_id);
 
     const rows = await sql`
       INSERT INTO evento_posicoes (evento_id, ministerio_id, funcao, quantidade)
@@ -168,8 +171,17 @@ export class EventosService {
     return rows[0];
   }
 
-  async deletePosicao(eventoId: string, posicao_id?: string) {
+  async deletePosicao(user: RequestUser, eventoId: string, posicao_id?: string) {
+    this.authz.requireLiderOrAdmin(user);
     if (posicao_id) {
+      const rows = await sql`
+        SELECT ministerio_id FROM evento_posicoes
+        WHERE id = ${posicao_id} AND evento_id = ${eventoId}
+      `;
+      const ministerioId = rows[0]?.ministerio_id as string | undefined;
+      if (ministerioId) {
+        await this.authz.requireMinisterioAccess(user, ministerioId);
+      }
       await sql`DELETE FROM evento_posicoes WHERE id = ${posicao_id} AND evento_id = ${eventoId}`;
     }
     return { ok: true };
