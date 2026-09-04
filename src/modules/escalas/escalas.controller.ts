@@ -11,6 +11,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { Public } from '../../common/decorators/auth.decorators';
 import type { RequestUser } from '../../common/types/auth.types';
 import { EscalasService } from './escalas.service';
 
@@ -58,6 +59,7 @@ export class EscalasController {
   }
 
   @Get()
+  @Public()
   list(
     @Query('evento_id') evento_id?: string,
     @Query('ministerio_id') ministerio_id?: string,
