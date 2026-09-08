@@ -1,14 +1,24 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  normalizeCategoria,
+  parseAtivaInput,
+} from '../../lib/mensagem-categorias';
 import { sql } from '../../lib/sql.js';
 
 @Injectable()
 export class MensagensService {
   async listCategorias() {
-    return sql`
+    const rows = await sql`
       SELECT c.*,
         COALESCE(
           json_agg(
-            json_build_object('id', m.id, 'titulo', m.titulo, 'corpo', m.corpo, 'ordem', m.ordem)
+            json_build_object(
+              'id', m.id,
+              'categoria_id', m.categoria_id,
+              'titulo', m.titulo,
+              'corpo', m.corpo,
+              'ordem', m.ordem
+            )
             ORDER BY m.ordem
           ) FILTER (WHERE m.id IS NOT NULL),
           '[]'
@@ -18,9 +28,16 @@ export class MensagensService {
       GROUP BY c.id
       ORDER BY c.ordem
     `;
+    return rows.map((row) => normalizeCategoria(row as Record<string, unknown>));
   }
 
-  async createCategoria(body: { nome?: string; descricao?: string; ordem?: number; dia?: string }) {
+  async createCategoria(body: {
+    nome?: string;
+    descricao?: string;
+    ordem?: number;
+    dia?: string;
+    ativa?: unknown;
+  }) {
     const { nome, descricao, ordem, dia } = body;
     const maxOrdem =
       ordem ??
@@ -28,42 +45,64 @@ export class MensagensService {
         await sql`SELECT COALESCE(MAX(ordem), 0) + 1 as next FROM mensagem_categorias`
       )[0].next;
 
+    const ativaInicial = parseAtivaInput(body.ativa) === false ? false : true;
+
     const result = await sql`
-      INSERT INTO mensagem_categorias (nome, dia, descricao, ordem)
-      VALUES (${nome!}, ${dia!}, ${descricao || null}, ${maxOrdem})
+      INSERT INTO mensagem_categorias (nome, dia, descricao, ordem, ativa)
+      VALUES (${nome!}, ${dia!}, ${descricao || null}, ${maxOrdem}, ${ativaInicial})
       RETURNING *
     `;
-    return result[0];
+    return normalizeCategoria(result[0] as Record<string, unknown>);
   }
 
   async updateCategoria(id: string, body: Record<string, unknown>) {
-    const sets: string[] = [];
+    const nome = body.nome;
+    const descricao = body.descricao;
+    const ordem = body.ordem;
+    const dia = body.dia;
+    const ativa = parseAtivaInput(body.ativa);
 
-    if (body.nome !== undefined) sets.push('nome');
-    if (body.descricao !== undefined) sets.push('descricao');
-    if (body.ordem !== undefined) sets.push('ordem');
-    if (body.ativa !== undefined) sets.push('ativa');
+    const hasNome = body.nome !== undefined;
+    const hasDescricao = body.descricao !== undefined;
+    const hasOrdem = body.ordem !== undefined;
+    const hasDia = body.dia !== undefined;
+    const hasAtiva = ativa !== undefined;
 
-    if (sets.length === 0) {
+    if (!hasNome && !hasDescricao && !hasOrdem && !hasDia && !hasAtiva) {
       return null;
     }
 
     let result;
-    if (sets.length === 1 && sets[0] === 'ativa') {
-      result = await sql`UPDATE mensagem_categorias SET ativa = ${body.ativa} WHERE id = ${id} RETURNING *`;
-    } else if (sets.length === 1 && sets[0] === 'nome') {
-      result = await sql`UPDATE mensagem_categorias SET nome = ${body.nome} WHERE id = ${id} RETURNING *`;
-    } else if (sets.length === 1 && sets[0] === 'descricao') {
-      result = await sql`UPDATE mensagem_categorias SET descricao = ${body.descricao} WHERE id = ${id} RETURNING *`;
-    } else if (sets.length === 1 && sets[0] === 'ordem') {
-      result = await sql`UPDATE mensagem_categorias SET ordem = ${body.ordem} WHERE id = ${id} RETURNING *`;
+    // Updates pontuais evitam CASE WHEN com boolean (pg + tagged template).
+    if (hasAtiva && !hasNome && !hasDescricao && !hasOrdem && !hasDia) {
+      result = await sql`
+        UPDATE mensagem_categorias SET ativa = ${ativa} WHERE id = ${id} RETURNING *
+      `;
+    } else if (hasNome && !hasDescricao && !hasOrdem && !hasDia && !hasAtiva) {
+      result = await sql`
+        UPDATE mensagem_categorias SET nome = ${nome} WHERE id = ${id} RETURNING *
+      `;
+    } else if (hasDescricao && !hasNome && !hasOrdem && !hasDia && !hasAtiva) {
+      result = await sql`
+        UPDATE mensagem_categorias SET descricao = ${descricao} WHERE id = ${id} RETURNING *
+      `;
+    } else if (hasOrdem && !hasNome && !hasDescricao && !hasDia && !hasAtiva) {
+      result = await sql`
+        UPDATE mensagem_categorias SET ordem = ${ordem} WHERE id = ${id} RETURNING *
+      `;
+    } else if (hasDia && !hasNome && !hasDescricao && !hasOrdem && !hasAtiva) {
+      result = await sql`
+        UPDATE mensagem_categorias SET dia = ${dia} WHERE id = ${id} RETURNING *
+      `;
     } else {
       result = await sql`
         UPDATE mensagem_categorias
-        SET nome = CASE WHEN ${body.nome !== undefined} THEN ${body.nome} ELSE nome END,
-            descricao = CASE WHEN ${body.descricao !== undefined} THEN ${body.descricao} ELSE descricao END,
-            ordem = CASE WHEN ${body.ordem !== undefined} THEN ${body.ordem} ELSE ordem END,
-            ativa = CASE WHEN ${body.ativa !== undefined} THEN ${body.ativa} ELSE ativa END
+        SET
+          nome = CASE WHEN ${hasNome} THEN ${nome ?? null} ELSE nome END,
+          descricao = CASE WHEN ${hasDescricao} THEN ${descricao ?? null} ELSE descricao END,
+          ordem = CASE WHEN ${hasOrdem} THEN ${ordem ?? null} ELSE ordem END,
+          dia = CASE WHEN ${hasDia} THEN ${dia ?? null} ELSE dia END,
+          ativa = CASE WHEN ${hasAtiva} THEN ${ativa ?? true} ELSE ativa END
         WHERE id = ${id}
         RETURNING *
       `;
@@ -72,7 +111,7 @@ export class MensagensService {
     if (result.length === 0) {
       throw new NotFoundException('Categoria nao encontrada');
     }
-    return result[0];
+    return normalizeCategoria(result[0] as Record<string, unknown>);
   }
 
   async deleteCategoria(id: string) {
