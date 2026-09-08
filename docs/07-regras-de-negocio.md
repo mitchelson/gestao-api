@@ -88,9 +88,15 @@ Regras consolidadas das conversas anteriores e do código legado (`pibrr`). A ge
 ## Visitantes e mensagens
 
 1. **Visitantes**: cadastro por líderes; fluxo de acompanhamento pastoral.
-2. **Mensagens**: categorias + modelos + histórico de enviadas.
-3. **Responsáveis**: vínculo visitante ↔ membro responsável.
-4. Status de mensagens pendentes exposto em `/visitantes/mensagens-status`.
+2. **Responsável**: `responsavel_id` no body grava em `visitantes.user_id` (UUID de `users`). Não usar a coluna legada `responsavel_id` (FK de `responsaveis`).
+3. **Mensagens**: categorias + modelos + histórico de enviadas (`/v1/mensagens/*`, autenticado líder+).
+4. **Categorias**: GET devolve array; `ativa` boolean; `modelos[].corpo` (não só `conteudo`); POST cria com `ativa: true` por padrão; PUT `{ ativa }` persiste.
+5. **Pendências WhatsApp (semana do culto, fuso `America/Boa_Vista`)**:
+   - Domingo âncora = domingo de `data_cadastro` (se domingo) ou o domingo anterior
+   - Mostrar só quem cai em `[domingo 00:00, próximo domingo 00:00)`
+   - Filtros: `user_id` = responsável logado (inbox/pendências), `sem_whatsapp` falso, categoria ativa sem envio
+   - Inbox inclui `domingoCulto` / `domingoCultoLabel`
+6. Status de mensagens pendentes também em `/visitantes/mensagens-status`.
 
 ---
 
