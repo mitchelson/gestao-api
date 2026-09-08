@@ -45,11 +45,14 @@ export class VisitantesService {
       responsavel_id,
     } = body;
 
+    // responsavel_id no body mapeia para visitantes.user_id (coluna atual).
+    // A coluna legada responsavel_id aponta para a tabela responsaveis e não deve
+    // receber UUID de users — isso quebrava a atribuição e as pendências.
     const rows = await sql`
       INSERT INTO visitantes (
         nome, celular, sexo, cidade, cidade_outra, bairro,
         faixa_etaria, civil_status, membro_igreja,
-        quer_visita, sem_whatsapp, responsavel_id
+        quer_visita, sem_whatsapp, user_id
       ) VALUES (
         ${nome as string}, ${celular as string}, ${(sexo as string) || null}, ${(cidade as string) || null},
         ${(cidade_outra as string) || null}, ${(bairro as string) || null}, ${(faixa_etaria as string) || null},
