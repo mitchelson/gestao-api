@@ -17,6 +17,10 @@ import {
 } from '../../lib/account-roles';
 import { sql } from '../../lib/sql';
 import { mapRowDates } from '../../lib/dates';
+import {
+  formatarDomingoCulto,
+  janelaSemanaCultoAtual,
+} from '../../lib/domingo-culto';
 import { AuthorizationService } from '../../common/services/authorization.service';
 import type { RequestUser } from '../../common/types/auth.types';
 
@@ -121,27 +125,53 @@ export class UsersService {
   }
 
   async getPendencias(userId: string) {
+    const { domingoYmd, inicio, fim } = janelaSemanaCultoAtual();
+    const domingoLabel = formatarDomingoCulto(domingoYmd);
+
     const cats =
       await sql`SELECT count(*)::int as total FROM mensagem_categorias WHERE ativa = true`;
-    const totalCategorias = cats[0].total;
+    const totalCategorias = (cats[0]?.total as number) ?? 0;
     if (totalCategorias === 0) return [];
 
+    // Semana do culto = [domingo 00:00, próximo domingo 00:00) em America/Boa_Vista.
     const pendencias = await sql`
-      SELECT v.id, v.nome, v.celular, v.data_cadastro, v.sexo,
-        count(vme.id)::int as enviadas
+      SELECT
+        v.id,
+        v.nome,
+        v.celular,
+        v.data_cadastro,
+        v.sexo,
+        (
+          SELECT count(*)::int
+          FROM mensagem_categorias c
+          WHERE c.ativa = true
+            AND EXISTS (
+              SELECT 1 FROM visitante_mensagens_enviadas me
+              WHERE me.visitante_id = v.id AND me.categoria_id = c.id
+            )
+        ) AS enviadas
       FROM visitantes v
-      LEFT JOIN visitante_mensagens_enviadas vme ON vme.visitante_id = v.id
       WHERE v.user_id = ${userId}
-        AND v.sem_whatsapp = false
-      GROUP BY v.id
-      HAVING count(vme.id) < ${totalCategorias}
+        AND v.sem_whatsapp IS NOT TRUE
+        AND v.data_cadastro >= ${inicio.toISOString()}
+        AND v.data_cadastro < ${fim.toISOString()}
+        AND EXISTS (
+          SELECT 1 FROM mensagem_categorias c
+          WHERE c.ativa = true
+            AND NOT EXISTS (
+              SELECT 1 FROM visitante_mensagens_enviadas me
+              WHERE me.visitante_id = v.id AND me.categoria_id = c.id
+            )
+        )
       ORDER BY v.data_cadastro DESC
     `;
 
     return pendencias.map((p: any) => ({
-      ...p,
+      ...mapRowDates(p as Record<string, unknown>, ['data_cadastro']),
       total_categorias: totalCategorias,
-      pendentes: totalCategorias - p.enviadas,
+      pendentes: totalCategorias - (p.enviadas as number),
+      domingo_culto: domingoYmd,
+      domingo_culto_label: domingoLabel,
     }));
   }
 
@@ -408,22 +438,59 @@ export class UsersService {
     }
 
     let whatsappPendentes: unknown[] = [];
+    let domingoCulto: string | null = null;
+    let domingoCultoLabel: string | null = null;
     if (showWhatsapp) {
       try {
         const cats =
           await sql`SELECT count(*)::int as total FROM mensagem_categorias WHERE ativa = true`;
         const totalCategorias = (cats[0]?.total as number) ?? 0;
+        const { domingoYmd, inicio, fim } = janelaSemanaCultoAtual();
+        domingoCulto = domingoYmd;
+        domingoCultoLabel = formatarDomingoCulto(domingoYmd);
         if (totalCategorias > 0) {
+          // Semana do culto atual: só cadastros ancorados nesse domingo + responsável logado.
           whatsappPendentes = await sql`
-            SELECT v.id, v.nome, v.celular, v.data_cadastro,
-              count(vme.id)::int as enviadas,
-              ${totalCategorias}::int as total_categorias,
-              (${totalCategorias}::int - count(vme.id)::int) as pendentes
+            SELECT
+              v.id,
+              v.nome,
+              v.celular,
+              v.data_cadastro,
+              v.sexo,
+              (
+                SELECT count(*)::int
+                FROM mensagem_categorias c
+                WHERE c.ativa = true
+                  AND EXISTS (
+                    SELECT 1 FROM visitante_mensagens_enviadas me
+                    WHERE me.visitante_id = v.id AND me.categoria_id = c.id
+                  )
+              ) AS enviadas,
+              ${totalCategorias}::int AS total_categorias,
+              (
+                ${totalCategorias}::int - (
+                  SELECT count(*)::int
+                  FROM mensagem_categorias c
+                  WHERE c.ativa = true
+                    AND EXISTS (
+                      SELECT 1 FROM visitante_mensagens_enviadas me
+                      WHERE me.visitante_id = v.id AND me.categoria_id = c.id
+                    )
+                )
+              ) AS pendentes
             FROM visitantes v
-            LEFT JOIN visitante_mensagens_enviadas vme ON vme.visitante_id = v.id
-            WHERE v.sem_whatsapp = false
-            GROUP BY v.id
-            HAVING count(vme.id) < ${totalCategorias}
+            WHERE v.user_id = ${userId}
+              AND v.sem_whatsapp IS NOT TRUE
+              AND v.data_cadastro >= ${inicio.toISOString()}
+              AND v.data_cadastro < ${fim.toISOString()}
+              AND EXISTS (
+                SELECT 1 FROM mensagem_categorias c
+                WHERE c.ativa = true
+                  AND NOT EXISTS (
+                    SELECT 1 FROM visitante_mensagens_enviadas me
+                    WHERE me.visitante_id = v.id AND me.categoria_id = c.id
+                  )
+              )
             ORDER BY v.data_cadastro DESC
             LIMIT 20
           `;
@@ -447,6 +514,8 @@ export class UsersService {
       whatsappPendentes: whatsappPendentes.map((row) =>
         mapRowDates(row as Record<string, unknown>, ['data_cadastro']),
       ),
+      domingoCulto,
+      domingoCultoLabel,
     };
   }
 }

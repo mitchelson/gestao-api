@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { sql } from '../../lib/sql.js';
+import { janelaSemanaCultoAtual } from '../../lib/domingo-culto';
 import type { RequestUser } from '../../common/types/auth.types';
 
 @Injectable()
@@ -52,9 +53,12 @@ export class AdminService {
     let whatsappPendentes = 0;
     if (showWhatsapp) {
       try {
+        const { inicio, fim } = janelaSemanaCultoAtual();
         const pend = await sql`
           SELECT count(*)::int as total FROM visitantes v
           WHERE v.sem_whatsapp IS NOT TRUE
+            AND v.data_cadastro >= ${inicio.toISOString()}
+            AND v.data_cadastro < ${fim.toISOString()}
             AND EXISTS (
               SELECT 1 FROM mensagem_categorias c WHERE c.ativa = true
               AND NOT EXISTS (
