@@ -17,12 +17,12 @@ import { Roles } from '../../common/decorators/auth.decorators';
 import { MensagensService } from './mensagens.service';
 
 @Controller('v1/mensagens')
-@Roles('admin', 'supervisor', 'lider')
 export class MensagensController {
   constructor(private readonly mensagensService: MensagensService) {}
 
   /** Array de categorias com `ativa` boolean e `modelos[].corpo`. */
   @Get('categorias')
+  @Roles('admin', 'supervisor', 'lider', 'membro')
   async listCategorias() {
     try {
       return await this.mensagensService.listCategorias();
@@ -34,6 +34,7 @@ export class MensagensController {
   }
 
   @Post('categorias')
+  @Roles('admin', 'supervisor', 'lider')
   @HttpCode(HttpStatus.CREATED)
   async createCategoria(
     @Body()
@@ -58,6 +59,7 @@ export class MensagensController {
   }
 
   @Put('categorias/:id')
+  @Roles('admin', 'supervisor', 'lider')
   async updateCategoria(@Param('id') id: string, @Body() body: Record<string, unknown>) {
     try {
       const result = await this.mensagensService.updateCategoria(id, body);
@@ -74,6 +76,7 @@ export class MensagensController {
   }
 
   @Delete('categorias/:id')
+  @Roles('admin', 'supervisor', 'lider')
   async deleteCategoria(@Param('id') id: string) {
     try {
       return await this.mensagensService.deleteCategoria(id);
@@ -85,6 +88,7 @@ export class MensagensController {
   }
 
   @Post('modelos')
+  @Roles('admin', 'supervisor', 'lider')
   @HttpCode(HttpStatus.CREATED)
   async createModelo(@Body() body: { categoria_id?: string; titulo?: string; corpo?: string }) {
     if (!body.categoria_id || !body.titulo || !body.corpo) {
@@ -99,6 +103,7 @@ export class MensagensController {
   }
 
   @Put('modelos/:id')
+  @Roles('admin', 'supervisor', 'lider')
   async updateModelo(@Param('id') id: string, @Body() body: { titulo?: string; corpo?: string }) {
     try {
       return await this.mensagensService.updateModelo(id, body);
@@ -110,6 +115,7 @@ export class MensagensController {
   }
 
   @Delete('modelos/:id')
+  @Roles('admin', 'supervisor', 'lider')
   async deleteModelo(@Param('id') id: string) {
     try {
       return await this.mensagensService.deleteModelo(id);
@@ -121,6 +127,7 @@ export class MensagensController {
   }
 
   @Get('enviadas')
+  @Roles('admin', 'supervisor', 'lider', 'membro')
   async listEnviadas(@Query('visitante_id') visitanteId?: string) {
     if (!visitanteId) {
       throw new BadRequestException('visitante_id obrigatorio');
@@ -134,6 +141,7 @@ export class MensagensController {
   }
 
   @Post('enviadas')
+  @Roles('admin', 'supervisor', 'lider', 'membro')
   @HttpCode(HttpStatus.CREATED)
   async createEnviada(@Body() body: { visitante_id?: string; categoria_id?: string }) {
     if (!body.visitante_id || !body.categoria_id) {
@@ -151,6 +159,7 @@ export class MensagensController {
   }
 
   @Delete('enviadas')
+  @Roles('admin', 'supervisor', 'lider', 'membro')
   async deleteEnviada(
     @Query('visitante_id') visitanteId?: string,
     @Query('categoria_id') categoriaId?: string,
