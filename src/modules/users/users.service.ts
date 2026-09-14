@@ -370,19 +370,6 @@ export class UsersService {
 
   async getInbox(user: RequestUser) {
     const userId = user.userId;
-    let acolhimentoId: string | null = null;
-    try {
-      const cfg = await sql`
-        SELECT valor FROM app_config WHERE chave = 'acolhimento_ministerio_id' LIMIT 1
-      `;
-      acolhimentoId = (cfg[0]?.valor as string) || null;
-    } catch {
-      acolhimentoId = null;
-    }
-
-    const showWhatsapp =
-      user.role === 'admin' ||
-      (!!acolhimentoId && (user.ministerioIds || []).includes(acolhimentoId));
 
     const escalasPendentes = await sql`
       SELECT es.id, es.evento_id, e.titulo as evento_titulo, e.data, e.horario, es.funcao,
@@ -437,27 +424,39 @@ export class UsersService {
       pedidosMinisterio = [];
     }
 
+    // Paridade com o site / app: só visitantes atribuídos a este responsável (user_id).
+    // Não depende de escala de Integração no culto nem de role staff / acolhimento.
     let whatsappPendentes: unknown[] = [];
     let domingoCulto: string | null = null;
     let domingoCultoLabel: string | null = null;
-    if (showWhatsapp) {
-      try {
-        const cats =
-          await sql`SELECT count(*)::int as total FROM mensagem_categorias WHERE ativa = true`;
-        const totalCategorias = (cats[0]?.total as number) ?? 0;
-        const { domingoYmd, inicio, fim } = janelaSemanaCultoAtual();
-        domingoCulto = domingoYmd;
-        domingoCultoLabel = formatarDomingoCulto(domingoYmd);
-        if (totalCategorias > 0) {
-          // Semana do culto atual: só cadastros ancorados nesse domingo + responsável logado.
-          whatsappPendentes = await sql`
-            SELECT
-              v.id,
-              v.nome,
-              v.celular,
-              v.data_cadastro,
-              v.sexo,
-              (
+    try {
+      const cats =
+        await sql`SELECT count(*)::int as total FROM mensagem_categorias WHERE ativa = true`;
+      const totalCategorias = (cats[0]?.total as number) ?? 0;
+      const { domingoYmd, inicio, fim } = janelaSemanaCultoAtual();
+      domingoCulto = domingoYmd;
+      domingoCultoLabel = formatarDomingoCulto(domingoYmd);
+      if (totalCategorias > 0) {
+        // Semana do culto atual: só cadastros do responsável logado nessa janela.
+        whatsappPendentes = await sql`
+          SELECT
+            v.id,
+            v.nome,
+            v.celular,
+            v.data_cadastro,
+            v.sexo,
+            (
+              SELECT count(*)::int
+              FROM mensagem_categorias c
+              WHERE c.ativa = true
+                AND EXISTS (
+                  SELECT 1 FROM visitante_mensagens_enviadas me
+                  WHERE me.visitante_id = v.id AND me.categoria_id = c.id
+                )
+            ) AS enviadas,
+            ${totalCategorias}::int AS total_categorias,
+            (
+              ${totalCategorias}::int - (
                 SELECT count(*)::int
                 FROM mensagem_categorias c
                 WHERE c.ativa = true
@@ -465,39 +464,27 @@ export class UsersService {
                     SELECT 1 FROM visitante_mensagens_enviadas me
                     WHERE me.visitante_id = v.id AND me.categoria_id = c.id
                   )
-              ) AS enviadas,
-              ${totalCategorias}::int AS total_categorias,
-              (
-                ${totalCategorias}::int - (
-                  SELECT count(*)::int
-                  FROM mensagem_categorias c
-                  WHERE c.ativa = true
-                    AND EXISTS (
-                      SELECT 1 FROM visitante_mensagens_enviadas me
-                      WHERE me.visitante_id = v.id AND me.categoria_id = c.id
-                    )
-                )
-              ) AS pendentes
-            FROM visitantes v
-            WHERE v.user_id = ${userId}
-              AND v.sem_whatsapp IS NOT TRUE
-              AND v.data_cadastro >= ${inicio.toISOString()}
-              AND v.data_cadastro < ${fim.toISOString()}
-              AND EXISTS (
-                SELECT 1 FROM mensagem_categorias c
-                WHERE c.ativa = true
-                  AND NOT EXISTS (
-                    SELECT 1 FROM visitante_mensagens_enviadas me
-                    WHERE me.visitante_id = v.id AND me.categoria_id = c.id
-                  )
               )
-            ORDER BY v.data_cadastro DESC
-            LIMIT 20
-          `;
-        }
-      } catch {
-        whatsappPendentes = [];
+            ) AS pendentes
+          FROM visitantes v
+          WHERE v.user_id = ${userId}
+            AND v.sem_whatsapp IS NOT TRUE
+            AND v.data_cadastro >= ${inicio.toISOString()}
+            AND v.data_cadastro < ${fim.toISOString()}
+            AND EXISTS (
+              SELECT 1 FROM mensagem_categorias c
+              WHERE c.ativa = true
+                AND NOT EXISTS (
+                  SELECT 1 FROM visitante_mensagens_enviadas me
+                  WHERE me.visitante_id = v.id AND me.categoria_id = c.id
+                )
+            )
+          ORDER BY v.data_cadastro DESC
+          LIMIT 20
+        `;
       }
+    } catch {
+      whatsappPendentes = [];
     }
 
     return {
